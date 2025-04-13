@@ -4,8 +4,8 @@ namespace Core
 {
     public class TimedMessage
     {
-        public string Text;
-        public float TimeAdded;
+        public readonly string Text;
+        public readonly float TimeAdded;
 
         public TimedMessage(string text)
         {
