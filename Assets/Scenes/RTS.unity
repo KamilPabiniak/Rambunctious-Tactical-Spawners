@@ -3462,6 +3462,7 @@ MonoBehaviour:
   - {fileID: 685789801}
   - {fileID: 1800964421}
   agentParent: {fileID: 1092164175}
+  uiSceneName: UI
 --- !u!1 &1132678644
 GameObject:
   m_ObjectHideFlags: 0
