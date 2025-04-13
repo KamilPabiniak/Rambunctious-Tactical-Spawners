@@ -21,6 +21,7 @@ namespace Agents
             if (agentPrefab == null || waypoints == null || waypoints.Length == 0) {return null;}
             GameObject agentObj = Instantiate(agentPrefab, Vector3.zero, Quaternion.identity, agentParent);
             Agent agent = agentObj.GetComponent<Agent>();
+            agent.SetSpeed(4f);
             if (agent != null) { agent.waypoints = waypoints; }
             return agent;
         }

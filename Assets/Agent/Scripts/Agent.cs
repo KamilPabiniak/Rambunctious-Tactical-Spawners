@@ -11,11 +11,14 @@ namespace Agents
         [Header("Reference")]
         [SerializeField] private Animator animator;
         [SerializeField] private Seeker seeker;
+        
+        [Header("Data")]
         public Transform[] waypoints;
-        public float movementSpeed = 4f;
+        public GameObject AgentGameObject => gameObject;
+        public event EventHandler<AgentArrivedEventArgs> AgentArrived;
+
+        private float _movementSpeed;
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
-
-
         private string _agentGuid;
         private Path _currentPath;
         private int _currentPathIndex;
@@ -23,11 +26,7 @@ namespace Agents
         
         //For DoTween
         private Sequence _movementSequence;
-
-
-        public event EventHandler<AgentArrivedEventArgs> AgentArrived;
-        public GameObject AgentGameObject => gameObject;
-
+        
         private void Awake()
         {
             _agentGuid = Guid.NewGuid().ToString();
@@ -88,7 +87,7 @@ namespace Agents
             {
                 Vector3 nextPoint = _currentPath.vectorPath[i];
                 float segmentDistance = Vector3.Distance(previousPosition, nextPoint);
-                float duration = segmentDistance / movementSpeed;
+                float duration = segmentDistance / _movementSpeed;
                 
                 Vector3 direction = (nextPoint - previousPosition).normalized;
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -96,7 +95,7 @@ namespace Agents
                 Tween moveTween = transform.DOMove(nextPoint, duration)
                     .SetEase(Ease.Linear)
                     .OnUpdate(() => UpdateAnimation(true));
-                
+                //Here is rotate
                 Tween rotateTween = transform.DORotateQuaternion(targetRotation, duration)
                     .SetEase(Ease.Linear);
                 
@@ -108,16 +107,21 @@ namespace Agents
                 previousPosition = nextPoint;
             }
 
+            //Upon arrival, inform and move on, boy
             _movementSequence.OnComplete(() =>
             {
                 UpdateAnimation(false);
                 AgentArrived?.Invoke(this, new AgentArrivedEventArgs(
                     _agentGuid,
-                    waypoints[_currentWaypointIndex].position,
                     waypoints[_currentWaypointIndex].name,
                     DateTime.Now));
                 MoveToRandomWaypoint();
             });
+        }
+
+        public void SetSpeed(float speed)
+        {
+            _movementSpeed = speed;
         }
 
 
@@ -125,7 +129,7 @@ namespace Agents
         {
             if (animator != null)
             {
-                animator.SetFloat(SpeedHash, isMoving ? movementSpeed : 0f);
+                animator.SetFloat(SpeedHash, isMoving ? _movementSpeed : 0f);
             }
         }
         
